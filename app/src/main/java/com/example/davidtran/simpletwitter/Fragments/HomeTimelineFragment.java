@@ -3,15 +3,14 @@ package com.example.davidtran.simpletwitter.Fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.example.davidtran.simpletwitter.Adapters.EndlessRecyclerViewScrollListener;
 import com.example.davidtran.simpletwitter.Adapters.TweetAdapter;
@@ -41,14 +40,32 @@ import cz.msebera.android.httpclient.Header;
  */
 
 public class HomeTimelineFragment extends Fragment {
+    private static final String SEARCH_KEYWORD = "search_keyword";
     ArrayList<Tweet> tweetArrayList = new ArrayList<>();
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.rcTweetList) RecyclerView rcTweetList;
     @BindView(R.id.loadingBar)
     ProgressBar loadingBar;
     TweetAdapter tweetAdapter;
     LinearLayoutManager layoutManager;
     RestClient restClient = RestApplication.getRestClient();
+    JsonParser jsonParser = new JsonParser();
+    JsonObject jsonObject = new JsonObject();
+    Tweet tweet = new Tweet();
     boolean isNewTweetPosted = false;
+    boolean isSearched = false;
+
+    public HomeTimelineFragment() {
+    }
+
+    public static HomeTimelineFragment newInstance(String searchKeyWord){
+        HomeTimelineFragment fragment = new HomeTimelineFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(SEARCH_KEYWORD,searchKeyWord);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -56,13 +73,22 @@ public class HomeTimelineFragment extends Fragment {
         View view = inflater.inflate(R.layout.frag_hometimeline, container, false);
         ButterKnife.bind(this,view);
 
-        /**************************/
         getHTimeline(0);
-        //tweetAdapter.notifyItemRangeInserted(tweetAdapter.getItemCount(),5);
         setUpAdapter();
-
+        setUpListener();
         return view;
 
+    }
+    private void setUpListener(){
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                tweetArrayList.clear();
+                getHTimeline(0);
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
     }
     private void setUpAdapter(){
         tweetAdapter = new TweetAdapter(tweetArrayList,getContext());
@@ -78,7 +104,6 @@ public class HomeTimelineFragment extends Fragment {
 
         rcTweetList.setAdapter(tweetAdapter);
 
-
         rcTweetList.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
@@ -90,6 +115,9 @@ public class HomeTimelineFragment extends Fragment {
 
             }
         });
+
+
+
     }
     public void getHTimeline(int page) {
 
@@ -100,13 +128,13 @@ public class HomeTimelineFragment extends Fragment {
 
                 Log.d("An", json.toString());
 
-
+                // check update list for owner's new tweet or another people's tweet
                 if(isNewTweetPosted == true){
-                    updatePostedTweet(json);
+                    updateOwnerTweet(json);
                     isNewTweetPosted = false;
                 }
                 else{
-                    getTweetList(json);
+                    updateTweetList(json);
                 }
             }
 
@@ -114,20 +142,21 @@ public class HomeTimelineFragment extends Fragment {
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                 super.onFailure(statusCode, headers, throwable, errorResponse);
             }
+
         });
     }
     public void notifyPostNewTweet(){
-       // rcTweetList.swapAdapter(tweetAdapter, true);
-        //rcTweetList.scrollBy(0, 0);
         isNewTweetPosted = true;
         getHTimeline(0);
         tweetAdapter.notifyItemInserted(0);
         rcTweetList.scrollToPosition(0);
     }
-    private void updatePostedTweet(JSONArray jsonArray){
-        JsonParser jsonParser = new JsonParser();
-        JsonObject jsonObject = new JsonObject();
-        Tweet tweet = new Tweet();
+    public void notifySearch(){
+        SearchTweets();
+
+    }
+    private void updateOwnerTweet(JSONArray jsonArray){
+
         try {
             jsonObject = (JsonObject) jsonParser.parse(jsonArray.get(0).toString());
         } catch (JSONException e) {
@@ -138,11 +167,37 @@ public class HomeTimelineFragment extends Fragment {
         tweetArrayList.add(0,tweet);
         tweetAdapter.notifyDataSetChanged();
     }
-    private void getTweetList(JSONArray jsonArray) {
-        JsonParser jsonParser = new JsonParser();
-        JsonObject jsonObject = new JsonObject();
-        Tweet tweet = new Tweet();
 
+    private void SearchTweets(){
+        Bundle bundle = getArguments();
+        String searchKeyWord = "";
+        if(bundle!=null){
+            searchKeyWord = bundle.getString(SEARCH_KEYWORD);
+            restClient.getSearchTweet(searchKeyWord,20,new JsonHttpResponseHandler(){
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    /*tweetArrayList.clear();
+                    updateTweetList(response);*/
+                    JSONArray jsonArray = new JSONArray();
+                    try {
+                        jsonArray = response.getJSONArray("statuses");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    tweetArrayList.clear();
+                    updateTweetList(jsonArray);
+                    Log.d("An",jsonArray.toString());
+
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    super.onFailure(statusCode, headers, throwable, errorResponse);
+                }
+            });
+        }
+    }
+    private void updateTweetList(JSONArray jsonArray){
         for (int i = 0; i < jsonArray.length(); i++) {
 
             try {
@@ -155,6 +210,5 @@ public class HomeTimelineFragment extends Fragment {
             tweetAdapter.notifyDataSetChanged();
         }
     }
-
 
 }

@@ -6,4 +6,5 @@ package com.example.davidtran.simpletwitter.Utils;
 
 public interface Communicator {
     public void notifyTweetPosted(boolean tweetPostStatus);
+
 }

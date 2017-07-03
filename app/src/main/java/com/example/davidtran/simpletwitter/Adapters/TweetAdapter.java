@@ -53,7 +53,10 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         Tweet tweet = tweetList.get(position);
 
 
-        Picasso.with(context).load(tweet.getUser().getProfileImageUrl()).transform(new RoundedCornersTransformation(3,3)).into(viewHolder.picProfile);
+        Picasso.with(context)
+                .load(tweet.getUser().getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(3,3))
+                .into(viewHolder.picProfile);
         viewHolder.tvUserFullName.setText(tweet.getUser().getName());
         viewHolder.tvScreenName.setText(tweet.getUser().getScreenName());
         viewHolder.tvTimePost.setText(getRelativeTimeAgo(tweet.getCreatedAt()));

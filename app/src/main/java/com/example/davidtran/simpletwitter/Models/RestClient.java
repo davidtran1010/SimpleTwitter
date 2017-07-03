@@ -52,12 +52,27 @@ public class RestClient extends OAuthBaseClient {
 		params.put("page", String.valueOf(page));
 		getClient().get(apiUrl, params, handler);
 	}
+	public void getSearchTweet(String searchkeyword,int count, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("search/tweets.json");
+		RequestParams params = new RequestParams();
+		params.put("q", searchkeyword);
+		params.put("count", String.valueOf(count));
+		getClient().get(apiUrl, params, handler);
+		Log.i("An","get search tweet");
+	}
 
 	public void postTweet(String body, AsyncHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/update.json");
 		RequestParams params = new RequestParams();
 		params.put("status", body);
 		getClient().post(apiUrl, params, handler);
+	}
+	//
+	public void getOwnerUser(AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("account/verify_credentials.json");
+		RequestParams params = new RequestParams();
+		params.put("skip_status", "1");
+		getClient().get(apiUrl,params, handler);
 	}
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");

@@ -46,4 +46,5 @@ dependencies {
     compile 'com.jakewharton:butterknife-compiler:8.6.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'jp.wasabeef:picasso-transformations:2.1.0'
+    compile 'com.github.scribejava:scribejava-apis:4.1.1'
 }

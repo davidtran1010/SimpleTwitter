@@ -1,5 +1,6 @@
 package com.example.davidtran.simpletwitter.Utils;
 
+import com.example.davidtran.simpletwitter.Models.OwnerUser;
 import com.example.davidtran.simpletwitter.Models.Tweet;
 import com.example.davidtran.simpletwitter.Models.User;
 import com.google.gson.JsonObject;
@@ -50,5 +51,18 @@ public class mJsonParser {
             tweet.setUser(mJsonParser.fromJsonObjectToUser(jsonTweetObject.get("user").getAsJsonObject()));
         }
         return tweet;
+    }
+    public static OwnerUser fromJsonObjectToOwnerUser(JsonObject jsonOwnerUserObject){
+        OwnerUser ownerUser = new OwnerUser();
+        if(jsonOwnerUserObject.has("name")){
+            ownerUser.setName(jsonOwnerUserObject.get("name").getAsString());
+        }
+        if(jsonOwnerUserObject.has("screen_name")){
+            ownerUser.setScreenName("@"+jsonOwnerUserObject.get("screen_name").getAsString());
+        }
+        if(jsonOwnerUserObject.has("profile_image_url")){
+            ownerUser.setProfileImageUrl(jsonOwnerUserObject.get("profile_image_url").getAsString());
+        }
+        return ownerUser;
     }
 }

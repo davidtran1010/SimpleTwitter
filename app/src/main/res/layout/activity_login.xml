@@ -6,7 +6,9 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+
     android:background="@drawable/background"
+
     tools:context=".LoginActivity" >
     <ImageView
         android:id="@+id/TwiterLogo"
@@ -24,7 +26,7 @@
         android:layout_margin="20dp"
         android:layout_below="@id/TwiterLogo"
         android:onClick="loginToRest"
-        android:background="@drawable/btn_loginstyle"
+        android:background="@drawable/btn_style"
         android:textColor="@android:color/white"
         android:shadowRadius="@android:integer/config_mediumAnimTime"
         android:text="Login" />

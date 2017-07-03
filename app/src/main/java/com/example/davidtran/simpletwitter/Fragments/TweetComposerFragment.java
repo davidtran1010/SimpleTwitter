@@ -13,26 +13,34 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.davidtran.simpletwitter.Models.OwnerUser;
 import com.example.davidtran.simpletwitter.Models.RestApplication;
 import com.example.davidtran.simpletwitter.Models.RestClient;
 import com.example.davidtran.simpletwitter.R;
 import com.example.davidtran.simpletwitter.Utils.Communicator;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 /**
  * Created by davidtran on 7/1/17.
  */
 
 public class TweetComposerFragment extends Fragment {
+    private static final String OWNER_USER_KEY = "owner_user_key";
+    @BindView(R.id.tvMyScreenName) TextView tvMyScreenName;
+    @BindView(R.id.tvMyFullName) TextView tvMyFullName;
+    @BindView(R.id.myPicProfile) ImageView myPicProfile;
+
     @BindView(R.id.btnTweet)
     Button btnTweet;
     @BindView(R.id.txtMyTweetContent)
@@ -41,14 +49,21 @@ public class TweetComposerFragment extends Fragment {
     TextView tvWordNumber;
     private Communicator comm = null;
 
+    public static TweetComposerFragment newInstance(OwnerUser ownerUser){
+        TweetComposerFragment fragment = new TweetComposerFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(OWNER_USER_KEY,ownerUser);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frag_newtweet,container,false);
         ButterKnife.bind(this,view);
 
+        showOwnerInfo();
         setUpListener();
-
         txtMyTweetContent.requestFocus();
         showKeyBoard();
 
@@ -102,6 +117,18 @@ public class TweetComposerFragment extends Fragment {
                 super.onFailure(statusCode, headers, throwable, errorResponse);
             }
         });
+    }
+    private void showOwnerInfo(){
+        Bundle bundle = getArguments();
+        OwnerUser ownerUser;
+        if(bundle!=null) {
+            ownerUser = bundle.getParcelable(OWNER_USER_KEY);
+            tvMyFullName.setText(ownerUser.getName());
+            tvMyScreenName.setText(ownerUser.getScreenName());
+            Picasso.with(getContext()).load(ownerUser.getProfileImageUrl())
+                    .transform(new RoundedCornersTransformation(5,5))
+                    .into(myPicProfile);
+        }
     }
     private void closeKeyBoard(){
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
