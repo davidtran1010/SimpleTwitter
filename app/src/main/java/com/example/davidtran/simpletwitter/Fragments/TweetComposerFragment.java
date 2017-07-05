@@ -1,8 +1,10 @@
 package com.example.davidtran.simpletwitter.Fragments;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,7 +37,7 @@ import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
  * Created by davidtran on 7/1/17.
  */
 
-public class TweetComposerFragment extends Fragment {
+public class TweetComposerFragment extends DialogFragment {
     private static final String OWNER_USER_KEY = "owner_user_key";
     @BindView(R.id.tvMyScreenName) TextView tvMyScreenName;
     @BindView(R.id.tvMyFullName) TextView tvMyFullName;
@@ -54,13 +56,24 @@ public class TweetComposerFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putParcelable(OWNER_USER_KEY,ownerUser);
         fragment.setArguments(bundle);
+
+
         return fragment;
     }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(STYLE_NO_TITLE, android.R.style.Theme_Holo_Light);
+    }
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frag_newtweet,container,false);
         ButterKnife.bind(this,view);
+
 
         showOwnerInfo();
         setUpListener();
@@ -86,7 +99,8 @@ public class TweetComposerFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //String[] strings = s.toString().split("\\s");
-                tvWordNumber.setText(""+s.length());
+
+                tvWordNumber.setText(""+ (140-s.length()));
             }
 
             @Override
@@ -126,7 +140,7 @@ public class TweetComposerFragment extends Fragment {
             tvMyFullName.setText(ownerUser.getName());
             tvMyScreenName.setText(ownerUser.getScreenName());
             Picasso.with(getContext()).load(ownerUser.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(5,5))
+                   // .transform(new RoundedCornersTransformation(5,5))
                     .into(myPicProfile);
         }
     }

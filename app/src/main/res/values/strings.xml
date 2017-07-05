@@ -3,4 +3,5 @@
     <string name="login_label">Log in</string>
     <string name="intent_scheme">oauth</string>
     <string name="intent_host">cprest</string>
+    <string name="appbar_scrolling_view_behavior" translatable="false">android.support.design.widget.AppBarLayout$ScrollingViewBeha‌​vior</string>
 </resources>
