@@ -5,17 +5,23 @@ package com.example.davidtran.simpletwitter.Adapters;
  */
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.davidtran.simpletwitter.Models.Tweet;
+import com.example.davidtran.simpletwitter.Models.Tweet_exEntities;
 import com.example.davidtran.simpletwitter.R;
+import com.example.davidtran.simpletwitter.Utils.ScreenCalculator;
 import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
@@ -44,6 +50,12 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_tweet, parent, false);
+
+
+
+
+
+
         return new tweetViewHolder(view);
     }
 
@@ -62,6 +74,29 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         viewHolder.tvTimePost.setText(getRelativeTimeAgo(tweet.getCreatedAt()));
         viewHolder.tvTweetContent.setText(tweet.getText());
 
+        bindPictures(viewHolder,position,tweet);
+
+
+    }
+    private void bindPictures(tweetViewHolder viewHolder, int position,Tweet tweet){
+        if(tweet.getExEntities()!=null) {
+            if(tweet.getExEntities().getMedia()!=null) {
+                Tweet_exEntities.Media media = tweet.getExEntities().getMedia().get(0);
+
+                ViewGroup.LayoutParams layoutParams = viewHolder.tweetPicture.getLayoutParams();
+                int realWidth = media.getSizes().getMedium().getW();
+                int realHeight = media.getSizes().getMedium().getH();
+                int width = ScreenCalculator.getScreenWidth() * 2/3;
+
+
+                layoutParams.width = width;
+                layoutParams.height = width * realHeight/realWidth;
+                Picasso.with(context)
+                        .load(tweet.getExEntities().getMedia().get(0).media_url)
+                        .transform(new RoundedCornersTransformation(3,3))
+                        .into(viewHolder.tweetPicture);
+            }
+        }
     }
 
     /*private String formatDateTime(String DateTime) {
@@ -103,6 +138,8 @@ public class TweetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         TextView tvTimePost;
         @BindView(R.id.tvTweetContent)
         TextView tvTweetContent;
+        @BindView(R.id.tweetPicture)
+        ImageView tweetPicture;
 
         public tweetViewHolder(View itemView) {
             super(itemView);

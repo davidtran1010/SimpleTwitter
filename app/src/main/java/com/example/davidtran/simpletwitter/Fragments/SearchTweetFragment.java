@@ -1,5 +1,6 @@
 package com.example.davidtran.simpletwitter.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.example.davidtran.simpletwitter.Activities.WebViewActivity;
 import com.example.davidtran.simpletwitter.Adapters.EndlessRecyclerViewScrollListener;
+import com.example.davidtran.simpletwitter.Adapters.ItemClickSupport;
 import com.example.davidtran.simpletwitter.Adapters.TweetAdapter;
 import com.example.davidtran.simpletwitter.Utils.mJsonParser;
 import com.google.gson.JsonObject;
@@ -81,6 +84,16 @@ public class SearchTweetFragment extends Fragment {
 
     }
     private void setUpListener(){
+
+        ItemClickSupport.addTo(rcTweetList)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                        intent.putExtra("DetailWebViewUrl", "https://twitter.com/i/status/" + tweetArrayList.get(position).getIdStr());
+                        startActivity(intent);
+                    }
+                });
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override

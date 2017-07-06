@@ -1,5 +1,6 @@
 package com.example.davidtran.simpletwitter.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,8 +16,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.davidtran.simpletwitter.Activities.MainActivity;
+import com.example.davidtran.simpletwitter.Activities.WebViewActivity;
 import com.example.davidtran.simpletwitter.Adapters.EndlessRecyclerViewScrollListener;
+import com.example.davidtran.simpletwitter.Adapters.ItemClickSupport;
+import com.example.davidtran.simpletwitter.Adapters.RecyclerTouchListener;
 import com.example.davidtran.simpletwitter.Adapters.TweetAdapter;
+import com.example.davidtran.simpletwitter.Models.Tweet_exEntities;
+import com.example.davidtran.simpletwitter.Utils.ClickListener;
 import com.example.davidtran.simpletwitter.Utils.mJsonParser;
 import com.google.gson.JsonObject;
 import com.example.davidtran.simpletwitter.Models.RestApplication;
@@ -99,8 +106,42 @@ public class HomeTimelineFragment extends Fragment {
     }
 
     private void setUpListener() {
+        ItemClickSupport.addTo(rcTweetList)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                        intent.putExtra("DetailWebViewUrl", "https://twitter.com/i/status/" + tweetArrayList.get(position).getIdStr());
+                        startActivity(intent);
+                    }
+                });
+        /*rcTweetList.addOnItemTouchListener(new RecyclerTouchListener(getContext(),
+                rcTweetList, new ClickListener() {
+            @Override
+            public void onClick(View view, final int position) {
+                switch (view.getId()){
+                    case R.id.tweetPicture:
+                        Toast.makeText(getContext(), "Single Click on picture :"+position,
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    default:Toast.makeText(getContext(), "Single Click on card item :"+position,
+                            Toast.LENGTH_SHORT).show();
+                }
 
+            }*//*
 
+            @Override
+            public void onLongClick(View view, int position) {
+                switch (view.getId()){
+                    case R.id.tweetPicture:
+                        Toast.makeText(getContext(), "Long Click on picture :"+position,
+                                Toast.LENGTH_LONG).show();
+                        break;
+                    default:Toast.makeText(getContext(), "LOng Click on card item :"+position,
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        }));*/
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -172,10 +213,7 @@ public class HomeTimelineFragment extends Fragment {
         tweetAdapter.notifyItemInserted(0);
         rcTweetList.scrollToPosition(0);
     }
-    public void notifySearch(){
-        SearchTweets();
 
-    }
     private void updateOwnerTweet(JSONArray jsonArray){
 
         try {
@@ -189,35 +227,7 @@ public class HomeTimelineFragment extends Fragment {
         tweetAdapter.notifyDataSetChanged();
     }
 
-    private void SearchTweets(){
-        Bundle bundle = getArguments();
-        String searchKeyWord = "";
-        if(bundle!=null){
-            searchKeyWord = bundle.getString(SEARCH_KEYWORD);
-            restClient.getSearchTweet(searchKeyWord,20,new JsonHttpResponseHandler(){
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    /*tweetArrayList.clear();
-                    updateTweetList(response);*/
-                    JSONArray jsonArray = new JSONArray();
-                    try {
-                        jsonArray = response.getJSONArray("statuses");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    tweetArrayList.clear();
-                    updateTweetList(jsonArray);
-                    Log.d("An",jsonArray.toString());
 
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse);
-                }
-            });
-        }
-    }
     private void updateTweetList(JSONArray jsonArray){
         for (int i = 0; i < jsonArray.length(); i++) {
 
@@ -227,6 +237,8 @@ public class HomeTimelineFragment extends Fragment {
                 e.printStackTrace();
             }
             tweet = mJsonParser.fromJsonObjectToTweet(jsonObject);
+            Tweet_exEntities te = mJsonParser.fromJsonObjectToTweetExEntities(jsonObject);
+            tweet.setExEntities(mJsonParser.fromJsonObjectToTweetExEntities(jsonObject));
             tweetArrayList.add(tweet);
             tweetAdapter.notifyDataSetChanged();
         }

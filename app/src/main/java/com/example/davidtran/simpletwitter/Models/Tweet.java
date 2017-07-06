@@ -25,6 +25,17 @@ public class Tweet {
     @Expose
     private Boolean truncated;
 
+    public Tweet_exEntities getExEntities() {
+        return exEntities;
+    }
+
+    public void setExEntities(Tweet_exEntities exEntities) {
+        this.exEntities = exEntities;
+    }
+
+    @SerializedName("extended_entities")
+    @Expose
+    private Tweet_exEntities exEntities;
 
     @SerializedName("source")
     @Expose
@@ -214,8 +225,6 @@ public class Tweet {
     }
 
 
-
-
     public Boolean getIsQuoteStatus() {
         return isQuoteStatus;
     }
@@ -281,3 +290,4 @@ public class Tweet {
     }
 
 }
+
